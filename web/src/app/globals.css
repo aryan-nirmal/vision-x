@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* Paytm Vasooli AI tokens: Modern enterprise merchant dashboard.
+   Paytm Deep Navy (#002E6E) & Electric Cyan (#00BAF2), clean crisp surfaces,
+   precise financial typography and clear status indicators. */
+@theme {
+  --color-page: #f8fafc;
+  --color-side: #f1f5f9;
+  --color-card: #ffffff;
+  --color-raised: #e2e8f0;
+  --color-line: rgb(15 23 42 / 0.08);
+  --color-line-strong: rgb(15 23 42 / 0.16);
+  --color-blue: #002e6e;
+  --color-blue-strong: #001f4d;
+  --color-accent: #00baf2;
+  --color-accent-strong: #0099cc;
+  --color-text: #0f172a;
+  --color-muted: #475569;
+  --color-faint: #64748b;
+  --color-amber: #d97706;
+  --color-mint: #059669;
+  --color-rose: #dc2626;
+  --color-paper: #ffffff;
+  --color-paper-ink: #002e6e;
+  --color-paper-muted: #64748b;
+
+  --font-sans: var(--font-mukta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  color-scheme: light;
+  background: var(--color-page);
+}
+
+body {
+  min-height: 100dvh;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  background: var(--color-page);
+  font-feature-settings: "kern";
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  /* One stroke for every lucide icon. */
+  svg.lucide {
+    stroke-width: 1.5;
+  }
+}
+
+@layer components {
+  .panel {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgb(31 27 22 / 0.05);
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* The ledger's double rule under a total. Used on the day's takings and the outstanding total only. */
+  .ledger-total {
+    display: inline-block;
+    padding-bottom: 2px;
+    border-bottom: 3px double rgb(31 27 22 / 0.5);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.25rem;
+    transition: background-color 150ms var(--ease-out), opacity 150ms var(--ease-out);
+    white-space: nowrap;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-blue);
+    color: white;
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--color-blue-strong);
+  }
+  .btn-quiet {
+    border: 1px solid var(--color-line-strong);
+    color: var(--color-text);
+    background: var(--color-card);
+  }
+  .btn-quiet:not(:disabled):hover {
+    background: var(--color-raised);
+  }
+  .field {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-card);
+    padding: 0.5rem 0.75rem;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+  }
+  .field::placeholder {
+    color: var(--color-faint);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-blue);
+  }
+}
+
+/* The one orchestrated moment: an invoice flipping to paid. */
+.paid-stamp {
+  animation: stamp 480ms var(--ease-out) both;
+}
+/* Tailwind's translate/rotate utilities use the individual properties, so only scale animates here. */
+@keyframes stamp {
+  from {
+    opacity: 0;
+    scale: 1.4;
+  }
+  to {
+    opacity: 0.9;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

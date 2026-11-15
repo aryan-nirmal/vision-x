@@ -1,0 +1,186 @@
+"use client";
+
+import clsx from "clsx";
+import { LayoutDashboard, LogOut, Mic, ReceiptIndianRupee, Users } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
+import { useApi } from "@/lib/api";
+import { istDayLabel, istTime, setAppNow } from "@/lib/format";
+import { supabaseBrowser } from "@/lib/supabase/client";
+import type { Me } from "@/lib/types";
+import { AskPanel } from "./ask/ask-panel";
+import { DemoClock } from "./demo-clock";
+import { LiveUpdates } from "./live-updates";
+
+const NAV = [
+  { href: "/", label: "Today", icon: LayoutDashboard },
+  { href: "/customers", label: "Customers", icon: Users },
+  { href: "/collections", label: "Collections", icon: ReceiptIndianRupee },
+];
+
+export function useMe() {
+  return useApi<Me>("/me", { refreshInterval: 60_000 });
+}
+
+function BrandMark() {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#002E6E] font-bold text-white text-sm shadow-sm">
+        P
+      </span>
+      <span className="text-base font-bold tracking-tight text-[#002E6E]">
+        Paytm <span className="font-semibold text-[#00BAF2]">Vasooli AI</span>
+      </span>
+    </div>
+  );
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: me } = useMe();
+  const [askOpen, setAskOpen] = useState(false);
+  // Relative dates ("today", "yesterday") follow the app clock, which the demo clock can move.
+  if (me) setAppNow(me.now);
+
+  async function signOut() {
+    await supabaseBrowser().auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
+
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
+  return (
+    <div className="min-h-dvh lg:grid lg:grid-cols-[250px_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-side px-4 py-5 lg:flex">
+        <Link href="/" aria-label="Paytm Vasooli AI home" className="flex h-9 items-center rounded-lg px-2">
+          <BrandMark />
+        </Link>
+
+        {/* Merchant Store Badge */}
+        <div className="mt-5 rounded-xl border border-line bg-card p-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#002E6E] text-white font-bold text-xs shadow-xs">
+              JS
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-text">{me?.merchant.name ?? "Joshi Supermarket"}</p>
+              <p className="truncate text-[11px] text-muted">FC Road, Pune</p>
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-center justify-between border-t border-line/50 pt-2 text-[10px] font-medium text-muted">
+            <span className="flex items-center gap-1 text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Soundbox Live
+            </span>
+            <span className="font-mono text-faint">MID: PTM00MOCK</span>
+          </div>
+        </div>
+
+        <nav aria-label="Main" className="mt-5 flex flex-col gap-1">
+          {NAV.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(href) ? "page" : undefined}
+              className={clsx(
+                "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors",
+                isActive(href)
+                  ? "bg-card text-[#002E6E] shadow-[inset_0_0_0_1px_var(--color-line)] font-semibold"
+                  : "text-muted hover:bg-raised hover:text-text",
+              )}
+            >
+              <Icon size={18} aria-hidden />
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Co-Pilot Quick Launcher */}
+        <button
+          onClick={() => setAskOpen(true)}
+          className="mt-4 flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-[#002E6E] to-[#004098] px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs transition-all hover:shadow-sm hover:from-[#002456] hover:to-[#003580]"
+        >
+          <span className="flex items-center gap-2">
+            <Mic size={15} className="text-[#00BAF2]" />
+            Vasooli AI
+          </span>
+          <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-mono text-white/90">Space</span>
+        </button>
+
+        <div className="mt-auto space-y-4 text-sm">
+          {me?.demo_tools ? <DemoClock me={me} /> : null}
+          <div className="space-y-2 px-2">
+            {me ? (
+              <div>
+                <p className="font-medium text-text">{me.merchant.name}</p>
+                {!me.demo_tools ? (
+                  <p className="text-muted">
+                    {istDayLabel(me.now)}, {istTime(me.now)}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            <button onClick={signOut} className="flex items-center gap-2 text-muted hover:text-text">
+              <LogOut size={16} aria-hidden /> Sign out
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-col">
+        <header className="flex items-center justify-between gap-3 px-4 pt-4 lg:hidden">
+          <BrandMark />
+          <button onClick={signOut} aria-label="Sign out" className="rounded-lg p-2 text-muted hover:bg-raised hover:text-text">
+            <LogOut size={18} />
+          </button>
+        </header>
+        <div className="min-w-0 flex-1 xl:grid xl:grid-cols-[minmax(0,1fr)_400px]">
+          {/* A size container: pages lay out by the space they get (the Ask panel docks beside them on xl). */}
+          <main className="@container min-w-0 px-4 pt-5 pb-28 sm:px-6 lg:px-10 lg:pt-8 lg:pb-12">
+            {children}
+            {me?.demo_tools ? (
+              <div className="mt-8 lg:hidden">
+                <DemoClock me={me} />
+              </div>
+            ) : null}
+          </main>
+          <AskPanel open={askOpen} onClose={() => setAskOpen(false)} />
+        </div>
+      </div>
+
+      {/* Between the phone tab bar and the docked panel (lg–xl), a floating button opens Vasooli AI. */}
+      <button
+        onClick={() => setAskOpen(true)}
+        className="fixed right-6 bottom-6 z-30 hidden h-12 items-center gap-2 rounded-xl bg-blue px-5 font-medium text-white shadow-[0_8px_24px_rgb(31_27_22/0.14)] transition-colors hover:bg-blue-strong lg:flex xl:hidden"
+      >
+        <Mic size={18} aria-hidden /> Vasooli AI
+      </button>
+
+      <nav
+        aria-label="Main"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-line bg-page/95 backdrop-blur lg:hidden"
+      >
+        {NAV.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive(href) ? "page" : undefined}
+            className={clsx("flex flex-col items-center gap-0.5 py-2.5 text-xs", isActive(href) ? "text-blue" : "text-muted")}
+          >
+            <Icon size={20} aria-hidden />
+            {label}
+          </Link>
+        ))}
+        <button onClick={() => setAskOpen(true)} className="flex flex-col items-center gap-0.5 py-2.5 text-xs text-blue">
+          <Mic size={20} aria-hidden />
+          Vasooli
+        </button>
+      </nav>
+
+      {me ? <LiveUpdates merchantId={me.merchant.id} /> : null}
+    </div>
+  );
+}
