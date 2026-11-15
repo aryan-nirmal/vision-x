@@ -150,3 +150,4 @@ class MockDatabase:
 
 # Singleton instance
 db = MockDatabase()
+
