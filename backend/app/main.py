@@ -4,7 +4,10 @@ Exposes REST endpoints defined in PRD_AND_API_CONTRACT.md.
 """
 import uuid
 from typing import Optional, Dict, Any, List
+import os
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -37,6 +40,16 @@ class ApprovalActionRequest(BaseModel):
     note: Optional[str] = "Supervisor review"
 
 # --- Endpoints ---
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+@app.get("/", response_class=HTMLResponse)
+@app.get("/demo", response_class=HTMLResponse)
+def serve_demo_ui():
+    index_file = STATIC_DIR / "index.html"
+    if not index_file.exists():
+        return HTMLResponse("<h1>Paytm ResolveAI Backend Live</h1>", status_code=200)
+    return HTMLResponse(content=index_file.read_text(), status_code=200)
 
 @app.get("/api/health")
 def health_check():

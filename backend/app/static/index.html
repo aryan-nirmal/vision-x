@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paytm ResolveAI — Dual-Pane Live Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            paytm: {
+              navy: '#002E6E',
+              blue: '#00BAF2',
+              dark: '#0B132B',
+              card: '#1C2541'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b132b; }
+    ::-webkit-scrollbar-thumb { background: #1c2541; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00baf2; }
+  </style>
+</head>
+<body class="bg-[#070D1E] text-slate-100 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Top Global Header -->
+  <header class="border-b border-slate-800 bg-[#0B132B]/90 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002E6E] to-[#00BAF2] flex items-center justify-center font-extrabold text-white text-lg shadow-lg shadow-[#00BAF2]/20">
+        P
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-lg tracking-tight text-white">Paytm <span class="text-[#00BAF2]">ResolveAI</span></h1>
+          <span class="text-[10px] font-semibold bg-[#00BAF2]/10 text-[#00BAF2] border border-[#00BAF2]/30 px-2 py-0.5 rounded-full uppercase tracking-wider">Autonomous Teammate</span>
+        </div>
+        <p class="text-xs text-slate-400">Verifiable resolution engine · Paytm Build for India Hackathon</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs font-mono font-medium text-emerald-400" id="backendStatus">Backend: CONNECTED (0.0.0.0:8000)</span>
+      </div>
+
+      <button onclick="resetDemo()" class="text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reset Demo State
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dual Pane Grid -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 max-w-[1700px] w-full mx-auto">
+    
+    <!-- LEFT PANE: Customer Mobile Simulator (5 Cols) -->
+    <section class="lg:col-span-5 flex flex-col bg-[#0B132B] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden h-[calc(100vh-100px)]">
+      <!-- Mobile Simulator Top Bar -->
+      <div class="bg-gradient-to-r from-[#002E6E] to-[#001D47] p-4 border-b border-slate-700/60 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-10 h-10 rounded-full bg-[#00BAF2]/20 border border-[#00BAF2] flex items-center justify-center font-bold text-[#00BAF2]">
+              AI
+            </div>
+            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#002E6E] rounded-full"></span>
+          </div>
+          <div>
+            <div class="font-semibold text-sm text-white flex items-center gap-1.5">
+              Paytm Support Assistant
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.2 rounded font-mono">Sarvam AI</span>
+            </div>
+            <div class="text-xs text-slate-300" id="userAccountDetails">Aarav Sharma · ₹140.00 Wallet</div>
+          </div>
+        </div>
+
+        <!-- Customer Profile Switcher -->
+        <select id="customerSelect" onchange="switchCustomer()" class="bg-[#1C2541] border border-slate-600 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#00BAF2]">
+          <option value="cust_101">🚇 Aarav (Metro ₹200)</option>
+          <option value="cust_102">✈️ Rahul (Flight ₹4800)</option>
+          <option value="cust_103">💸 Priya (P2P ₹500)</option>
+        </select>
+      </div>
+
+      <!-- Quick Test Prompt Chips for Hackathon Judges -->
+      <div class="bg-[#0f1a38] px-4 py-2.5 border-b border-slate-800 flex items-center gap-2 overflow-x-auto">
+        <span class="text-[11px] font-semibold text-slate-400 whitespace-nowrap uppercase tracking-wider">Quick Prompts:</span>
+        <button onclick="setPrompt('Bhai mera metro recharge ka 200 rs kat gaya par smart card recharge nahi hua')" class="text-xs bg-[#1C2541] hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-[#00BAF2] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors">
+          🚇 Metro ₹200 (Auto-Refund)
+        </button>
+        <button onclick="setPrompt('Flight booking failed, 4800 deducted from HDFC but no PNR generated')" class="text-xs bg-[#1C2541] hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-[#00BAF2] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors">
+          ✈️ Flight ₹4800 (Human Gate)
+        </button>
+        <button onclick="setPrompt('Galti se 500 kisi aur ko send ho gaya, refund karo')" class="text-xs bg-[#1C2541] hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-[#00BAF2] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors">
+          💸 P2P ₹500 (RBI Guardrail)
+        </button>
+      </div>
+
+      <!-- Chat Thread Messages -->
+      <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div class="flex items-start gap-2.5 max-w-[85%]">
+          <div class="w-7 h-7 rounded-full bg-[#00BAF2]/20 border border-[#00BAF2]/40 flex items-center justify-center text-xs font-bold text-[#00BAF2] shrink-0">
+            P
+          </div>
+          <div class="bg-[#1C2541] border border-slate-700/60 p-3 rounded-2xl rounded-tl-sm text-xs leading-relaxed text-slate-200">
+            Namaste! Main Paytm ka AI Teammate hoon. Main aapke payment aur transaction issues ko turant verify karke resolve kar sakta hoon. Aap kis baare me poochhna chahte hain?
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="p-3 bg-[#0f1a38] border-t border-slate-800">
+        <form onsubmit="sendMessage(event)" class="flex gap-2">
+          <input 
+            type="text" 
+            id="chatInput" 
+            placeholder="Type in Hindi, Hinglish, or English..."
+            class="flex-1 bg-[#1C2541] border border-slate-700 focus:border-[#00BAF2] rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none transition-all"
+          />
+          <button 
+            type="submit" 
+            id="sendBtn"
+            class="bg-gradient-to-r from-[#002E6E] to-[#00BAF2] hover:opacity-90 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-[#00BAF2]/10"
+          >
+            <span>Resolve</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT PANE: Human Agent & Operations Command Center (7 Cols) -->
+    <section class="lg:col-span-7 flex flex-col bg-[#0B132B] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden h-[calc(100vh-100px)]">
+      <!-- Ops Header Tabs -->
+      <div class="bg-[#0f1a38] p-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-1 bg-[#1C2541] p-1 rounded-xl border border-slate-700">
+          <button onclick="switchTab('trace')" id="tabTraceBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#00BAF2] text-slate-900 transition-all">
+            ⚡ Live Multi-Agent Trace
+          </button>
+          <button onclick="switchTab('approvals')" id="tabApprovalsBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+            <span>🛡️ Pending Approvals</span>
+            <span id="approvalBadge" class="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] flex items-center justify-center font-mono">0</span>
+          </button>
+          <button onclick="switchTab('ledger')" id="tabLedgerBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all">
+            📊 Core Ledger State
+          </button>
+        </div>
+
+        <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          Policy: <span class="text-white">&lt; ₹1k Auto / &ge; ₹1k Gate</span>
+        </div>
+      </div>
+
+      <!-- TAB 1: Live Multi-Agent Reasoning Trace -->
+      <div id="tabTrace" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <div class="border border-slate-800 bg-[#0f1a38]/60 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-xs text-slate-200">Autonomous Workflow Pipeline</div>
+            <div class="text-[11px] text-slate-400">Step-by-step audit record from Intent Classification to DB State Verification</div>
+          </div>
+          <div class="text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
+            "No 'done' until verified"
+          </div>
+        </div>
+
+        <!-- Trace steps container -->
+        <div id="traceContainer" class="space-y-3 font-mono">
+          <div class="text-center py-16 text-slate-500 text-xs">
+            Send a query from the Customer panel or click a Quick Prompt to view live agent reasoning steps in real-time.
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Pending Human Approvals Queue -->
+      <div id="tabApprovals" class="flex-1 overflow-y-auto p-5 space-y-4 hidden">
+        <div class="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-xs text-amber-200">Human-in-the-Loop Supervisor Desk</div>
+            <div class="text-[11px] text-amber-400/80">High-value transactions (&ge; ₹1,000) or ambiguous cases paused for supervisor authorization</div>
+          </div>
+          <span class="text-xs font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/40">Gated Autonomy</span>
+        </div>
+
+        <div id="approvalsList" class="space-y-4">
+          <!-- Rendered dynamically -->
+          <div class="text-center py-16 text-slate-500 text-xs">
+            No pending approval requests. High-value cases will appear here automatically.
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Core Ledger State Inspector -->
+      <div id="tabLedger" class="flex-1 overflow-y-auto p-5 space-y-4 hidden">
+        <div class="border border-slate-800 bg-[#0f1a38] rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-xs text-slate-200">Paytm Mock Core Banking & Wallet Ledger</div>
+            <div class="text-[11px] text-slate-400">Real-time database state. Watch status mutate to REFUNDED upon agent verification.</div>
+          </div>
+          <button onclick="refreshLedger()" class="text-xs text-[#00BAF2] hover:underline flex items-center gap-1 font-mono">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div id="ledgerContainer" class="space-y-3 font-mono text-xs">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentCustomerId = "cust_101";
+
+    const USER_MAP = {
+      "cust_101": { name: "Aarav Sharma", wallet: "₹140.00" },
+      "cust_102": { name: "Rahul Verma", wallet: "₹520.00" },
+      "cust_103": { name: "Priya Patel", wallet: "₹1,250.00" }
+    };
+
+    function switchCustomer() {
+      currentCustomerId = document.getElementById("customerSelect").value;
+      const user = USER_MAP[currentCustomerId];
+      document.getElementById("userAccountDetails").innerText = `${user.name} · ${user.wallet} Wallet`;
+      refreshLedger();
+    }
+
+    function setPrompt(text) {
+      document.getElementById("chatInput").value = text;
+      // Auto select matching customer
+      if (text.includes("metro")) {
+        document.getElementById("customerSelect").value = "cust_101";
+      } else if (text.includes("Flight")) {
+        document.getElementById("customerSelect").value = "cust_102";
+      } else if (text.includes("Galti")) {
+        document.getElementById("customerSelect").value = "cust_103";
+      }
+      switchCustomer();
+    }
+
+    function switchTab(tab) {
+      document.getElementById("tabTrace").classList.add("hidden");
+      document.getElementById("tabApprovals").classList.add("hidden");
+      document.getElementById("tabLedger").classList.add("hidden");
+
+      document.getElementById("tabTraceBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all";
+      document.getElementById("tabApprovalsBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5";
+      document.getElementById("tabLedgerBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all";
+
+      if (tab === "trace") {
+        document.getElementById("tabTrace").classList.remove("hidden");
+        document.getElementById("tabTraceBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#00BAF2] text-slate-900 transition-all";
+      } else if (tab === "approvals") {
+        document.getElementById("tabApprovals").classList.remove("hidden");
+        document.getElementById("tabApprovalsBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-400 text-slate-900 transition-all flex items-center gap-1.5";
+        fetchApprovals();
+      } else if (tab === "ledger") {
+        document.getElementById("tabLedger").classList.remove("hidden");
+        document.getElementById("tabLedgerBtn").className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#00BAF2] text-slate-900 transition-all";
+        refreshLedger();
+      }
+    }
+
+    async function sendMessage(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById("chatInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendUserMessage(message);
+      input.value = "";
+
+      const sendBtn = document.getElementById("sendBtn");
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = `<span>Resolving...</span>`;
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer_id: currentCustomerId,
+            message: message
+          })
+        });
+
+        const data = await res.json();
+        renderAgentResponse(data);
+        renderTrace(data.trace, data.status);
+        fetchApprovals();
+        refreshLedger();
+      } catch (err) {
+        appendBotMessage("Error connecting to backend: " + err.message);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<span>Resolve</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+      }
+    }
+
+    function appendUserMessage(msg) {
+      const container = document.getElementById("chatMessages");
+      const div = document.createElement("div");
+      div.className = "flex items-start justify-end gap-2.5";
+      div.innerHTML = `
+        <div class="bg-[#002E6E] text-white p-3 rounded-2xl rounded-tr-sm text-xs leading-relaxed max-w-[85%] shadow-md border border-[#00BAF2]/30">
+          ${msg}
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendBotMessage(text) {
+      const container = document.getElementById("chatMessages");
+      const div = document.createElement("div");
+      div.className = "flex items-start gap-2.5 max-w-[85%]";
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-[#00BAF2]/20 border border-[#00BAF2]/40 flex items-center justify-center text-xs font-bold text-[#00BAF2] shrink-0">
+          P
+        </div>
+        <div class="bg-[#1C2541] border border-slate-700/60 p-3 rounded-2xl rounded-tl-sm text-xs leading-relaxed text-slate-200">
+          ${text}
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderAgentResponse(data) {
+      const container = document.getElementById("chatMessages");
+      const div = document.createElement("div");
+      div.className = "flex items-start gap-2.5 max-w-[90%]";
+
+      let badgeHtml = "";
+      if (data.status === "RESOLVED") {
+        badgeHtml = `
+          <div class="mt-2.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono flex items-center justify-between text-emerald-300">
+            <span class="flex items-center gap-1.5 font-bold">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              VERIFIED REFUND: ₹${data.verification.amount}
+            </span>
+            <span class="text-slate-400">UTR: ${data.verification.refund_utr || 'N/A'}</span>
+          </div>
+        `;
+      } else if (data.status === "NEEDS_APPROVAL") {
+        badgeHtml = `
+          <div class="mt-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] font-mono flex items-center justify-between text-amber-300">
+            <span class="flex items-center gap-1.5 font-bold">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              SUPERVISOR GATE TRIGGERED
+            </span>
+            <span class="text-slate-400">Pre-investigated & Routed</span>
+          </div>
+        `;
+      } else if (data.status === "REJECTED") {
+        badgeHtml = `
+          <div class="mt-2.5 p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-[11px] font-mono flex items-center justify-between text-sky-300">
+            <span class="flex items-center gap-1.5 font-bold">
+              ℹ️ POLICY DISPUTE FILED
+            </span>
+            <span class="text-slate-400">NPCI / RBI Compliant</span>
+          </div>
+        `;
+      }
+
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-[#00BAF2]/20 border border-[#00BAF2]/40 flex items-center justify-center text-xs font-bold text-[#00BAF2] shrink-0">
+          P
+        </div>
+        <div class="bg-[#1C2541] border border-slate-700/60 p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed text-slate-100 shadow-md">
+          <p>${data.reply}</p>
+          ${badgeHtml}
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderTrace(trace, status) {
+      const container = document.getElementById("traceContainer");
+      if (!trace || trace.length === 0) return;
+
+      container.innerHTML = "";
+      trace.forEach((step, index) => {
+        let badgeColor = "bg-blue-500/20 text-blue-300 border-blue-500/40";
+        if (step.agent === "Payment Specialist") badgeColor = "bg-purple-500/20 text-purple-300 border-purple-500/40";
+        if (step.agent === "Policy Engine") badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        if (step.agent === "Verification Specialist") badgeColor = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+        if (step.agent === "Action Service") badgeColor = "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
+
+        const card = document.createElement("div");
+        card.className = "bg-[#1C2541]/90 border border-slate-800 rounded-xl p-3.5 flex flex-col gap-1.5 shadow-sm";
+        card.innerHTML = `
+          <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500">#${index + 1}</span>
+              <span class="px-2 py-0.5 rounded border ${badgeColor} font-bold text-[10px] uppercase">${step.agent}</span>
+              <span class="text-slate-300 font-semibold">${step.action}</span>
+            </div>
+            <span class="text-slate-500 text-[10px]">${step.timestamp}</span>
+          </div>
+          <div class="text-[12px] text-slate-300 font-sans pl-6 border-l-2 border-slate-700 ml-1">
+            ${step.details}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function fetchApprovals() {
+      try {
+        const res = await fetch("/api/approvals");
+        const list = await res.json();
+        const badge = document.getElementById("approvalBadge");
+        const pendingCount = list.filter(a => a.status === "PENDING").length;
+        badge.innerText = pendingCount;
+
+        const container = document.getElementById("approvalsList");
+        if (list.length === 0) {
+          container.innerHTML = `<div class="text-center py-16 text-slate-500 text-xs">No pending approval requests. High-value cases will appear here automatically.</div>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        list.forEach(item => {
+          const isPending = item.status === "PENDING";
+          const card = document.createElement("div");
+          card.className = `p-4 rounded-xl border ${isPending ? 'bg-[#1C2541] border-amber-500/40' : 'bg-slate-900/60 border-slate-800'} space-y-3`;
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded uppercase font-bold">${item.risk_level} RISK</span>
+                <span class="text-xs font-mono text-slate-400 ml-2">Ticket: ${item.ticket_id}</span>
+              </div>
+              <span class="text-sm font-bold text-white font-mono">₹${item.amount}</span>
+            </div>
+
+            <div>
+              <div class="text-xs font-bold text-slate-200">${item.customer_name} — ${item.issue}</div>
+              <div class="text-[11px] text-slate-400 mt-1">Bank UTR: <span class="font-mono text-slate-300">${item.evidence.bank_utr}</span> · Gateway Ref: <span class="font-mono text-slate-300">${item.evidence.gateway_ref}</span></div>
+            </div>
+
+            <div class="bg-[#0f1a38] p-2.5 rounded-lg border border-slate-800 text-[11px]">
+              <span class="text-[#00BAF2] font-semibold">AI Pre-investigated Recommendation:</span>
+              <p class="text-slate-300 mt-0.5">${item.recommendation}</p>
+            </div>
+
+            ${isPending ? `
+              <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="resolveTicket('${item.ticket_id}', 'REJECT')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition-all">
+                  Reject Claim
+                </button>
+                <button onclick="resolveTicket('${item.ticket_id}', 'APPROVE')" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-md shadow-emerald-500/20">
+                  Approve & Refund ₹${item.amount}
+                </button>
+              </div>
+            ` : `
+              <div class="text-right text-[11px] font-mono ${item.status === 'APPROVED' ? 'text-emerald-400' : 'text-rose-400'}">
+                ● ${item.status}: ${item.resolution_note || ''}
+              </div>
+            `}
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Failed to load approvals", err);
+      }
+    }
+
+    async function resolveTicket(ticketId, action) {
+      try {
+        const res = await fetch(`/api/approvals/${ticketId}/action`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: action, note: "Approved via Human Supervisor Console" })
+        });
+        const data = await res.json();
+        alert(data.message);
+        fetchApprovals();
+        refreshLedger();
+      } catch (err) {
+        alert("Failed to take action: " + err.message);
+      }
+    }
+
+    async function refreshLedger() {
+      try {
+        const res = await fetch("/api/transactions");
+        const txns = await res.json();
+        const container = document.getElementById("ledgerContainer");
+        container.innerHTML = "";
+
+        txns.forEach(t => {
+          let statusBadge = "bg-amber-500/10 text-amber-300 border-amber-500/30";
+          if (t.status === "REFUNDED") statusBadge = "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 font-bold";
+          if (t.status === "SUCCESS_AT_BENEFICIARY") statusBadge = "bg-blue-500/10 text-blue-300 border-blue-500/30";
+
+          const card = document.createElement("div");
+          card.className = "bg-[#1C2541] p-3 rounded-xl border border-slate-800 flex items-center justify-between";
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white">${t.title}</span>
+                <span class="text-[10px] text-slate-400 font-mono">(${t.id})</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">
+                Amount: <span class="text-slate-200 font-bold">₹${t.amount}</span> · Bank: ${t.source_bank}
+                ${t.refund_utr ? `<span class="ml-2 text-emerald-400">· Refund Ref: ${t.refund_utr}</span>` : ''}
+              </div>
+            </div>
+            <div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] border ${statusBadge}">${t.status}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Ledger fetch error", err);
+      }
+    }
+
+    async function resetDemo() {
+      if (!confirm("Reset database to initial seed state?")) return;
+      await fetch("/api/reset", { method: "POST" });
+      document.getElementById("chatMessages").innerHTML = `
+        <div class="flex items-start gap-2.5 max-w-[85%]">
+          <div class="w-7 h-7 rounded-full bg-[#00BAF2]/20 border border-[#00BAF2]/40 flex items-center justify-center text-xs font-bold text-[#00BAF2] shrink-0">
+            P
+          </div>
+          <div class="bg-[#1C2541] border border-slate-700/60 p-3 rounded-2xl rounded-tl-sm text-xs leading-relaxed text-slate-200">
+            Namaste! Main Paytm ka AI Teammate hoon. Demo state reset ho chuka hai. Aap test start kar sakte hain.
+          </div>
+        </div>
+      `;
+      document.getElementById("traceContainer").innerHTML = `
+        <div class="text-center py-16 text-slate-500 text-xs">
+          Demo state reset. Send a message to see live agent reasoning steps.
+        </div>
+      `;
+      switchCustomer();
+      fetchApprovals();
+      refreshLedger();
+    }
+
+    // Initial load
+    switchCustomer();
+    fetchApprovals();
+    refreshLedger();
+  </script>
+</body>
+</html>
